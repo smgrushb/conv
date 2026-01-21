@@ -14,7 +14,6 @@ import (
 	"github.com/smgrushb/conv/internal/generics/gslice"
 	"github.com/smgrushb/conv/internal/generics/gvalue"
 	"github.com/smgrushb/conv/internal/ptr"
-	"github.com/smgrushb/conv/internal/unsafeheader"
 	"google.golang.org/protobuf/proto"
 	"reflect"
 	"strings"
@@ -28,8 +27,7 @@ var (
 )
 
 var (
-	errorRT     = ReflectType[error]()
-	intDoubleRT = ReflectType[**int]()
+	errorRT = ReflectType[error]()
 )
 
 type structConverter struct {
@@ -218,8 +216,7 @@ fcLoop:
 }
 
 func (s *structConverter) mapConvert(dPtr, sPtr unsafe.Pointer) {
-	dEmptyMapInterface := (*unsafeheader.EmptyInterface)(unsafe.Pointer(gptr.Of(reflect.New(s.convertType.dstTyp).Interface())))
-	dv := ptrToMapValue(dEmptyMapInterface, dPtr)
+	dv := reflect.NewAt(s.convertType.dstTyp, dPtr).Elem()
 	if dv.IsNil() {
 		dv.Set(reflect.MakeMapWithSize(s.convertType.dstTyp, len(s.fieldConverters)))
 	}
@@ -285,17 +282,7 @@ func (f *fieldConverter) convert(dPtr, sPtr unsafe.Pointer) {
 		if f.sType == typeMethod || !method.IsNil() {
 			callback := method.Call(nil)
 			value := callback[0]
-			var vPtr unsafe.Pointer
-			if value.CanAddr() {
-				vPtr = unsafe.Pointer(value.UnsafeAddr())
-			} else {
-				vPtr = PtrOfAny(value)
-			}
-			if gvalue.In(value.Type().Kind(), reflect.Map, reflect.Pointer) {
-				p := unsafe.Pointer(reflect.New(intDoubleRT).Pointer())
-				*(**int)(p) = (*int)(vPtr)
-				vPtr = p
-			}
+			vPtr := PtrOfAny(value)
 			switch f.sOutType {
 			case boolOut:
 				if !callback[1].Bool() {

@@ -66,19 +66,13 @@ func newValuePtr(t reflect.Type) unsafe.Pointer {
 	return v
 }
 
-type Value struct {
-	typ unsafe.Pointer
-	ptr unsafe.Pointer
-	uintptr
-}
-
-func (v Value) Pointer() unsafe.Pointer {
-	return v.ptr
-}
-
 func PtrOfAny(v reflect.Value) unsafe.Pointer {
-	p := unsafe.Pointer(reflect.ValueOf(&v).Pointer())
-	return (*Value)(p).Pointer()
+	if v.CanAddr() {
+		return unsafe.Pointer(v.UnsafeAddr())
+	}
+	newVal := reflect.New(v.Type())
+	newVal.Elem().Set(v)
+	return unsafe.Pointer(newVal.Pointer())
 }
 
 func ReflectType[T any]() reflect.Type {

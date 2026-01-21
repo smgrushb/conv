@@ -8,7 +8,6 @@ package convextend
 import (
 	"fmt"
 	"github.com/smgrushb/conv/internal"
-	"github.com/smgrushb/conv/internal/generics/gptr"
 	"github.com/smgrushb/conv/internal/generics/gslice"
 	"github.com/smgrushb/conv/internal/generics/gvalue"
 	"github.com/smgrushb/conv/internal/unsafeheader"
@@ -58,12 +57,14 @@ func (m *map2KVP[K, V]) Converter() func(dPtr unsafe.Pointer, sPtr unsafe.Pointe
 			dv := reflect.NewAt(sliceType, dPtr).Elem()
 			newVal := reflect.MakeSlice(sliceType, length, length)
 			dv.Set(newVal)
+			dSlice.Data = unsafe.Pointer(newVal.Pointer())
+			dSlice.Cap = length
 		}
 		var offset uintptr
-		ei := (*unsafeheader.EmptyInterface)(unsafe.Pointer(gptr.Of(reflect.New(m.rtype).Interface())))
 		for k, v := range s {
-			ei.SetWord(unsafe.Pointer(uintptr(dSlice.Data) + offset))
-			kvp := (*(*any)(unsafe.Pointer(ei))).(KVP[K, V])
+			elemPtr := unsafe.Pointer(uintptr(dSlice.Data) + offset)
+			elemVal := reflect.NewAt(m.rtype, elemPtr)
+			kvp := elemVal.Interface().(KVP[K, V])
 			kvp.SetKey(k)
 			kvp.SetValue(v)
 			offset += m.size
@@ -100,10 +101,10 @@ func (m *kvp2Map[K, V]) Converter() func(dPtr unsafe.Pointer, sPtr unsafe.Pointe
 		length := sSlice.Len
 		data := make(map[K]V, length)
 		var offset uintptr
-		ei := (*unsafeheader.EmptyInterface)(unsafe.Pointer(gptr.Of(reflect.New(m.rtype).Interface())))
 		for i := 0; i < length; i++ {
-			ei.SetWord(unsafe.Pointer(uintptr(sSlice.Data) + offset))
-			kvp := (*(*any)(unsafe.Pointer(ei))).(KVP[K, V])
+			elemPtr := unsafe.Pointer(uintptr(sSlice.Data) + offset)
+			elemVal := reflect.NewAt(m.rtype, elemPtr)
+			kvp := elemVal.Interface().(KVP[K, V])
 			data[kvp.GetKey()] = kvp.GetValue()
 			offset += m.size
 		}

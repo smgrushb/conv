@@ -19,25 +19,3 @@ type SliceHeader struct {
 	Len  int
 	Cap  int
 }
-
-type EmptyInterface struct {
-	typ  unsafe.Pointer
-	word unsafe.Pointer
-}
-
-func NewEmptyInterface(typ, word unsafe.Pointer) EmptyInterface {
-	return EmptyInterface{typ: typ, word: word}
-}
-
-func (e *EmptyInterface) GetTyp() unsafe.Pointer {
-	return e.typ
-}
-
-func (e *EmptyInterface) GetWord() unsafe.Pointer {
-	return e.word
-}
-
-func (e *EmptyInterface) SetWord(p unsafe.Pointer) *EmptyInterface {
-	e.word = p
-	return e
-}

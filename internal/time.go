@@ -84,9 +84,12 @@ var (
 	utcZeroTime   = time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC)
 )
 
-func cvtStringTime(format string, _ *int64, as asTime, dPtr, sPtr unsafe.Pointer) {
+func cvtStringTime(format string, minUnix *int64, as asTime, dPtr, sPtr unsafe.Pointer) {
 	t, err := time.ParseInLocation(format, *(*string)(sPtr), time.Local)
 	if err != nil {
+		return
+	}
+	if minUnix != nil && t.Unix() < *minUnix {
 		return
 	}
 	if t.Equal(localZeroUnix) {

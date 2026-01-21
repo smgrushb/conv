@@ -67,6 +67,7 @@ func TimeFormat(format string) Option {
 // MinUnix 指定time.Time(包含time.Time各别名类型)转换到非time.Time(包含time.Time各别名类型)时的最低有效时间，低于此时间则不转换
 // 目前场景：time/string互转(默认生效)，time转any(默认不生效)
 // 可以传入scene来自订生效规则
+// 注意：time.Time同类型互转(包含time.Time各别名类型)时将直接浅拷贝，此配置被绕过，不生效
 // 注意：别名类型仅检查被RegisterTimeWrapper方法注册的
 func MinUnix(unix int64, scene ...internal.MinUnixSceneType) Option {
 	return func(o *internal.StructOption) {
@@ -82,6 +83,7 @@ func MinUnix(unix int64, scene ...internal.MinUnixSceneType) Option {
 // MinUnixBy 指定time.Time(包含time.Time各别名类型)转换到非time.Time(包含time.Time各别名类型)时的最低有效时间，低于此时间则不转换
 // 目前场景：time/string互转(默认生效)，time转any(默认不生效)
 // 可以传入scene来自订生效规则
+// 注意：time.Time同类型互转(包含time.Time各别名类型)时将直接浅拷贝，此配置被绕过，不生效
 // 注意：别名类型仅检查被RegisterTimeWrapper方法注册的
 func MinUnixBy(t time.Time, scene ...internal.MinUnixSceneType) Option {
 	return func(o *internal.StructOption) {
