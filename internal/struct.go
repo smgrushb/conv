@@ -179,6 +179,9 @@ fcLoop:
 							*(**int)(fdPtr) = nil
 							continue fcLoop
 						}
+						if fc.converter.nilValuePolicy == NilValuePolicyIgnore {
+							continue fcLoop
+						}
 						fsPtr = fc.converter.sEmptyDereferValPtr
 						break
 					}
@@ -233,6 +236,9 @@ fcLoop:
 				fsPtr = unsafe.Pointer(*((**int)(fsPtr)))
 				if fsPtr == nil {
 					if s.option.IgnoreEmptyFields {
+						continue fcLoop
+					}
+					if fc.converter.nilValuePolicy == NilValuePolicyIgnore {
 						continue fcLoop
 					}
 					fsPtr = fc.converter.sEmptyDereferValPtr

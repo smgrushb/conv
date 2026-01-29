@@ -57,6 +57,7 @@ type StructOption struct {
 	TimeFormat           string
 	MinUnix              *int64
 	MinUnixScene         MinUnixSceneType
+	NilValuePolicy       NilValuePolicy
 	BannedFields         *set.Set[string]
 	WhiteListFields      *set.Set[string]
 	AliasFields          map[string]string
@@ -122,6 +123,7 @@ func (o *StructOption) Clone() *StructOption {
 		TimeFormat:           o.TimeFormat,
 		MinUnix:              o.MinUnix,
 		MinUnixScene:         o.MinUnixScene,
+		NilValuePolicy:       o.NilValuePolicy,
 		BannedFields:         o.BannedFields.Clone(),
 		WhiteListFields:      o.WhiteListFields.Clone(),
 		AliasFields:          gmap.Clone(o.AliasFields),

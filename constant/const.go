@@ -23,3 +23,10 @@ func MinUnixScene(scene ...internal.MinUnixSceneType) (res internal.MinUnixScene
 	}
 	return
 }
+
+type NilValuePolicy = internal.NilValuePolicy
+
+const (
+	NilValuePolicyIgnore = internal.NilValuePolicyIgnore
+	NilValuePolicyZero   = internal.NilValuePolicyZero
+)

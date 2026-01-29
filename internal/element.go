@@ -22,6 +22,7 @@ type elemConverter struct {
 	dReferDeep          int
 	sReferDeep          int
 	sEmptyDereferValPtr unsafe.Pointer
+	nilValuePolicy      NilValuePolicy
 	converter           converter
 }
 
@@ -35,6 +36,7 @@ func newElemConverter(dType, sType reflect.Type, option *StructOption) (*elemCon
 		}
 		ec.converter = c
 		ec.sEmptyDereferValPtr = newValuePtr(ec.sDereferType)
+		ec.nilValuePolicy = option.NilValuePolicy
 		return ec, true
 	}
 	return nil, false
@@ -46,6 +48,9 @@ func (e *elemConverter) convert(dPtr, sPtr unsafe.Pointer) {
 		if sPtr == nil {
 			if e.dReferDeep > 0 {
 				*(**int)(dPtr) = nil
+				return
+			}
+			if e.nilValuePolicy == NilValuePolicyIgnore {
 				return
 			}
 			sPtr = e.sEmptyDereferValPtr

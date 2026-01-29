@@ -195,3 +195,17 @@ func Phase(opts ...Option) Option {
 		o.Phase++
 	}
 }
+
+// NilValuePolicy 配置当源数据为 nil 指针且目标为值类型时的处理策略。
+// 注意：conv 在处理转换前会优先尝试解引用源指针。此策略用于处理解引用过程中遇到的 nil 指针。
+//
+// 支持的策略:
+// - NilValuePolicyIgnore: 遇到 nil 指针直接返回，跳过赋值（默认）。
+// - NilValuePolicyZero: 视为源类型的零值，继续后续转换。
+//   (例如: nil *Struct -> 视为 Struct{} -> 继续转换)。
+//   场景示例：配合 SerializeToString 将 nil *Struct 转换为 "{}" 字符串，而不是直接跳过。
+func NilValuePolicy(policy internal.NilValuePolicy) Option {
+	return func(o *internal.StructOption) {
+		o.NilValuePolicy = policy
+	}
+}
