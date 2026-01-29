@@ -50,6 +50,7 @@ type StructOption struct {
 	IgnoreFunc           bool
 	UseStrings           bool
 	UseMarshal           bool
+	SerializeToString    bool
 	StrBytesZeroCopy     bool
 	TagName              string
 	PriorityTagName      string
@@ -114,6 +115,7 @@ func (o *StructOption) Clone() *StructOption {
 		IgnoreFunc:           o.IgnoreFunc,
 		UseStrings:           o.UseStrings,
 		UseMarshal:           o.UseMarshal,
+		SerializeToString:    o.SerializeToString,
 		StrBytesZeroCopy:     o.StrBytesZeroCopy,
 		TagName:              o.TagName,
 		PriorityTagName:      o.PriorityTagName,

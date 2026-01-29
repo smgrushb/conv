@@ -44,6 +44,15 @@ func In[T comparable](v T, s ...T) bool {
 	return false
 }
 
+func NotIn[T comparable](v T, s ...T) bool {
+	for _, vv := range s {
+		if v == vv {
+			return false
+		}
+	}
+	return true
+}
+
 // Safe 当v为nil时，基于反射初始化v并返回，反之返回v
 // 注意: 当v为nil且类型为接口并且无附带实现类型时，无法初始化，将直接返回
 func Safe[T any](v T) T {

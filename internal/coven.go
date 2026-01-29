@@ -112,7 +112,10 @@ func newConverter(dstTyp, srcTyp reflect.Type, option *StructOption) *Converter 
 	}
 	if c == nil {
 		if option != nil && dstTyp.Kind() == reflect.String {
-			if srcPtr := reflect.PointerTo(srcTyp); option.UseStrings && srcPtr.Implements(stringerType) {
+			if k := srcTyp.Kind(); option.SerializeToString &&
+				gvalue.NotIn(k, reflect.Invalid, reflect.Complex64, reflect.Complex128, reflect.Chan, reflect.Func, reflect.UnsafePointer) {
+				c = newSerializeConverter(cTyp)
+			} else if srcPtr := reflect.PointerTo(srcTyp); option.UseStrings && srcPtr.Implements(stringerType) {
 				c = newStringsConverter(cTyp)
 			} else if option.UseMarshal && srcPtr.Implements(marshalerType) {
 				c = newMarshalJsonConverter(cTyp)

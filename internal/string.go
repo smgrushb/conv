@@ -8,6 +8,7 @@ package internal
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/bytedance/sonic"
 	"reflect"
 	"unsafe"
 )
@@ -16,6 +17,16 @@ var (
 	stringerType  = ReflectType[fmt.Stringer]()
 	marshalerType = ReflectType[json.Marshaler]()
 )
+
+type serializeConverter struct {
+	*convertType
+}
+
+func (s *serializeConverter) convert(dPtr, sPtr unsafe.Pointer) {
+	if str, err := sonic.MarshalString(reflect.NewAt(s.srcTyp, sPtr).Elem().Interface()); err == nil {
+		*(*string)(dPtr) = str
+	}
+}
 
 type stringsConverter struct {
 	*convertType
@@ -37,6 +48,10 @@ func (m *marshalJsonConverter) convert(dPtr, sPtr unsafe.Pointer) {
 			*(*string)(dPtr) = string(bs)
 		}
 	}
+}
+
+func newSerializeConverter(typ *convertType) converter {
+	return &serializeConverter{convertType: typ}
 }
 
 func newStringsConverter(typ *convertType) converter {

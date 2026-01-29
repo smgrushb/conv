@@ -145,14 +145,21 @@ func IgnoreFunc() Option {
 	}
 }
 
-// UseStrings 如果类型实现了fmt.Stringer, 优先调用String()方法来转换成string，优先级高于UseMarshal
+// SerializeToString 如果目标类型是string且源类型可序列化，直接序列化源值转换成string，优先级高于UseStrings和UseMarshal
+func SerializeToString() Option {
+	return func(o *internal.StructOption) {
+		o.SerializeToString = true
+	}
+}
+
+// UseStrings 如果目标类型是string且源类型实现了fmt.Stringer, 调用String()方法来转换成string，优先级高于UseMarshal，低于SerializeToString
 func UseStrings() Option {
 	return func(o *internal.StructOption) {
 		o.UseStrings = true
 	}
 }
 
-// UseMarshal 如果类型实现了json.Marshaler, 优先调用MarshalJSON()方法来转换成string，优先级低于UseStrings
+// UseMarshal 如果目标类型是string且源类型实现了json.Marshaler, 调用MarshalJSON()方法来转换成string，优先级低于SerializeToString、UseStrings
 func UseMarshal() Option {
 	return func(o *internal.StructOption) {
 		o.UseMarshal = true
