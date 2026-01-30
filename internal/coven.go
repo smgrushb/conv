@@ -114,7 +114,7 @@ func newConverter(dstTyp, srcTyp reflect.Type, option *StructOption) *Converter 
 		if option != nil && dstTyp.Kind() == reflect.String {
 			if k := srcTyp.Kind(); option.SerializeToString &&
 				gvalue.NotIn(k, reflect.Invalid, reflect.Complex64, reflect.Complex128, reflect.Chan, reflect.Func, reflect.UnsafePointer) {
-				c = newSerializeConverter(cTyp)
+				c = newSerializeConverter(cTyp, option.NilValuePolicy)
 			} else if srcPtr := reflect.PointerTo(srcTyp); option.UseStrings && srcPtr.Implements(stringerType) {
 				c = newStringsConverter(cTyp)
 			} else if option.UseMarshal && srcPtr.Implements(marshalerType) {

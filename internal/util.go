@@ -60,8 +60,15 @@ func referDeep(t reflect.Type) (reflect.Type, int) {
 
 func newValuePtr(t reflect.Type) unsafe.Pointer {
 	var v unsafe.Pointer
-	if v = ptr.NewValuePtr(t.Kind()); v == nil {
-		v = unsafe.Pointer(reflect.New(t).Elem().UnsafeAddr())
+	k := t.Kind()
+	if v = ptr.NewValuePtr(k); v == nil {
+		e := reflect.New(t).Elem()
+		if k == reflect.Slice {
+			e.Set(reflect.MakeSlice(t, 0, 0))
+		} else if k == reflect.Map {
+			e.Set(reflect.MakeMap(t))
+		}
+		v = unsafe.Pointer(e.UnsafeAddr())
 	}
 	return v
 }

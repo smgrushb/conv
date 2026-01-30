@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/bytedance/sonic"
+	"github.com/smgrushb/conv/internal/generics/gvalue"
 	"reflect"
 	"unsafe"
 )
@@ -20,10 +21,32 @@ var (
 
 type serializeConverter struct {
 	*convertType
+	nilValuePolicy NilValuePolicy
 }
 
 func (s *serializeConverter) convert(dPtr, sPtr unsafe.Pointer) {
-	if str, err := sonic.MarshalString(reflect.NewAt(s.srcTyp, sPtr).Elem().Interface()); err == nil {
+	p := reflect.NewAt(s.srcTyp, sPtr)
+	if p.IsNil() {
+		if s.nilValuePolicy == NilValuePolicyIgnore {
+			return
+		}
+		p = reflect.New(s.srcTyp)
+	}
+	e := p.Elem()
+	if k := e.Kind(); gvalue.In(k, reflect.Interface, reflect.Pointer, reflect.Slice, reflect.Map) && e.IsNil() {
+		if s.nilValuePolicy == NilValuePolicyIgnore {
+			return
+		}
+		switch k {
+		case reflect.Slice:
+			e = reflect.MakeSlice(s.srcTyp, 0, 0)
+		case reflect.Map:
+			e = reflect.MakeMap(s.srcTyp)
+		default:
+			e = reflect.New(s.srcTyp).Elem()
+		}
+	}
+	if str, err := sonic.MarshalString(e.Interface()); err == nil {
 		*(*string)(dPtr) = str
 	}
 }
@@ -50,8 +73,8 @@ func (m *marshalJsonConverter) convert(dPtr, sPtr unsafe.Pointer) {
 	}
 }
 
-func newSerializeConverter(typ *convertType) converter {
-	return &serializeConverter{convertType: typ}
+func newSerializeConverter(typ *convertType, nilValuePolicy NilValuePolicy) converter {
+	return &serializeConverter{convertType: typ, nilValuePolicy: nilValuePolicy}
 }
 
 func newStringsConverter(typ *convertType) converter {
