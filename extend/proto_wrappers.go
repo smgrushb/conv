@@ -39,7 +39,7 @@ func init() {
 
 type bool2BoolValue struct{}
 
-func Bool2BoolValue() internal.CustomConverter {
+func Bool2BoolValue() internal.CustomConverterV2 {
 	return &bool2BoolValue{}
 }
 
@@ -51,9 +51,10 @@ func (s *bool2BoolValue) Is(dstTyp, srcTyp reflect.Type) bool {
 	return ok
 }
 
-func (s *bool2BoolValue) Converter() func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) {
-	return func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) {
+func (s *bool2BoolValue) Converter() func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) bool {
+	return func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) bool {
 		*(*wrapperspb.BoolValue)(dPtr) = *wrapperspb.Bool(*(*bool)(sPtr))
+		return true
 	}
 }
 
@@ -63,7 +64,7 @@ func (s *bool2BoolValue) Key() string {
 
 type boolValue2Bool struct{}
 
-func BoolValue2Bool() internal.CustomConverter {
+func BoolValue2Bool() internal.CustomConverterV2 {
 	return &boolValue2Bool{}
 }
 
@@ -75,9 +76,10 @@ func (s *boolValue2Bool) Is(dstTyp, srcTyp reflect.Type) bool {
 	return ok
 }
 
-func (s *boolValue2Bool) Converter() func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) {
-	return func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) {
+func (s *boolValue2Bool) Converter() func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) bool {
+	return func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) bool {
 		*(*bool)(dPtr) = (*wrapperspb.BoolValue)(sPtr).GetValue()
+		return true
 	}
 }
 
@@ -91,7 +93,7 @@ func (s *boolValue2Bool) Key() string {
 
 type bytes2BytesValue struct{}
 
-func Bytes2BytesValue() internal.CustomConverter {
+func Bytes2BytesValue() internal.CustomConverterV2 {
 	return &bytes2BytesValue{}
 }
 
@@ -103,9 +105,10 @@ func (s *bytes2BytesValue) Is(dstTyp, srcTyp reflect.Type) bool {
 	return ok
 }
 
-func (s *bytes2BytesValue) Converter() func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) {
-	return func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) {
+func (s *bytes2BytesValue) Converter() func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) bool {
+	return func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) bool {
 		*(*wrapperspb.BytesValue)(dPtr) = *wrapperspb.Bytes(*(*[]byte)(sPtr))
+		return true
 	}
 }
 
@@ -115,7 +118,7 @@ func (s *bytes2BytesValue) Key() string {
 
 type bytesValue2Bytes struct{}
 
-func BytesValue2Bytes() internal.CustomConverter {
+func BytesValue2Bytes() internal.CustomConverterV2 {
 	return &bytesValue2Bytes{}
 }
 
@@ -127,9 +130,10 @@ func (s *bytesValue2Bytes) Is(dstTyp, srcTyp reflect.Type) bool {
 	return ok
 }
 
-func (s *bytesValue2Bytes) Converter() func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) {
-	return func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) {
+func (s *bytesValue2Bytes) Converter() func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) bool {
+	return func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) bool {
 		*(*[]byte)(dPtr) = (*wrapperspb.BytesValue)(sPtr).GetValue()
+		return true
 	}
 }
 
@@ -143,7 +147,7 @@ func (s *bytesValue2Bytes) Key() string {
 
 type float642DoubleValue struct{}
 
-func Float642DoubleValue() internal.CustomConverter {
+func Float642DoubleValue() internal.CustomConverterV2 {
 	return &float642DoubleValue{}
 }
 
@@ -155,9 +159,10 @@ func (s *float642DoubleValue) Is(dstTyp, srcTyp reflect.Type) bool {
 	return ok
 }
 
-func (s *float642DoubleValue) Converter() func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) {
-	return func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) {
+func (s *float642DoubleValue) Converter() func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) bool {
+	return func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) bool {
 		*(*wrapperspb.DoubleValue)(dPtr) = *wrapperspb.Double(*(*float64)(sPtr))
+		return true
 	}
 }
 
@@ -167,7 +172,7 @@ func (s *float642DoubleValue) Key() string {
 
 type doubleValue2Float64 struct{}
 
-func DoubleValue2Float64() internal.CustomConverter {
+func DoubleValue2Float64() internal.CustomConverterV2 {
 	return &doubleValue2Float64{}
 }
 
@@ -179,9 +184,10 @@ func (s *doubleValue2Float64) Is(dstTyp, srcTyp reflect.Type) bool {
 	return ok
 }
 
-func (s *doubleValue2Float64) Converter() func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) {
-	return func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) {
+func (s *doubleValue2Float64) Converter() func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) bool {
+	return func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) bool {
 		*(*float64)(dPtr) = (*wrapperspb.DoubleValue)(sPtr).GetValue()
+		return true
 	}
 }
 
@@ -195,7 +201,7 @@ func (s *doubleValue2Float64) Key() string {
 
 type float322FloatValue struct{}
 
-func Float322FloatValue() internal.CustomConverter {
+func Float322FloatValue() internal.CustomConverterV2 {
 	return &float322FloatValue{}
 }
 
@@ -207,9 +213,10 @@ func (s *float322FloatValue) Is(dstTyp, srcTyp reflect.Type) bool {
 	return ok
 }
 
-func (s *float322FloatValue) Converter() func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) {
-	return func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) {
+func (s *float322FloatValue) Converter() func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) bool {
+	return func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) bool {
 		*(*wrapperspb.FloatValue)(dPtr) = *wrapperspb.Float(*(*float32)(sPtr))
+		return true
 	}
 }
 
@@ -219,7 +226,7 @@ func (s *float322FloatValue) Key() string {
 
 type floatValue2Float32 struct{}
 
-func FloatValue2Float32() internal.CustomConverter {
+func FloatValue2Float32() internal.CustomConverterV2 {
 	return &floatValue2Float32{}
 }
 
@@ -231,9 +238,10 @@ func (s *floatValue2Float32) Is(dstTyp, srcTyp reflect.Type) bool {
 	return ok
 }
 
-func (s *floatValue2Float32) Converter() func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) {
-	return func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) {
+func (s *floatValue2Float32) Converter() func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) bool {
+	return func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) bool {
 		*(*float32)(dPtr) = (*wrapperspb.FloatValue)(sPtr).GetValue()
+		return true
 	}
 }
 
@@ -247,7 +255,7 @@ func (s *floatValue2Float32) Key() string {
 
 type int322Int32Value struct{}
 
-func Int322Int32Value() internal.CustomConverter {
+func Int322Int32Value() internal.CustomConverterV2 {
 	return &int322Int32Value{}
 }
 
@@ -259,9 +267,10 @@ func (s *int322Int32Value) Is(dstTyp, srcTyp reflect.Type) bool {
 	return ok
 }
 
-func (s *int322Int32Value) Converter() func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) {
-	return func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) {
+func (s *int322Int32Value) Converter() func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) bool {
+	return func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) bool {
 		*(*wrapperspb.Int32Value)(dPtr) = *wrapperspb.Int32(*(*int32)(sPtr))
+		return true
 	}
 }
 
@@ -271,7 +280,7 @@ func (s *int322Int32Value) Key() string {
 
 type int32Value2Int32 struct{}
 
-func Int32Value2Int32() internal.CustomConverter {
+func Int32Value2Int32() internal.CustomConverterV2 {
 	return &int32Value2Int32{}
 }
 
@@ -283,9 +292,10 @@ func (s *int32Value2Int32) Is(dstTyp, srcTyp reflect.Type) bool {
 	return ok
 }
 
-func (s *int32Value2Int32) Converter() func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) {
-	return func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) {
+func (s *int32Value2Int32) Converter() func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) bool {
+	return func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) bool {
 		*(*int32)(dPtr) = (*wrapperspb.Int32Value)(sPtr).GetValue()
+		return true
 	}
 }
 
@@ -299,7 +309,7 @@ func (s *int32Value2Int32) Key() string {
 
 type int642Int64Value struct{}
 
-func Int642Int64Value() internal.CustomConverter {
+func Int642Int64Value() internal.CustomConverterV2 {
 	return &int642Int64Value{}
 }
 
@@ -311,9 +321,10 @@ func (s *int642Int64Value) Is(dstTyp, srcTyp reflect.Type) bool {
 	return ok
 }
 
-func (s *int642Int64Value) Converter() func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) {
-	return func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) {
+func (s *int642Int64Value) Converter() func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) bool {
+	return func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) bool {
 		*(*wrapperspb.Int64Value)(dPtr) = *wrapperspb.Int64(*(*int64)(sPtr))
+		return true
 	}
 }
 
@@ -323,7 +334,7 @@ func (s *int642Int64Value) Key() string {
 
 type int64Value2Int64 struct{}
 
-func Int64Value2Int64() internal.CustomConverter {
+func Int64Value2Int64() internal.CustomConverterV2 {
 	return &int64Value2Int64{}
 }
 
@@ -335,9 +346,10 @@ func (s *int64Value2Int64) Is(dstTyp, srcTyp reflect.Type) bool {
 	return ok
 }
 
-func (s *int64Value2Int64) Converter() func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) {
-	return func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) {
+func (s *int64Value2Int64) Converter() func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) bool {
+	return func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) bool {
 		*(*int64)(dPtr) = (*wrapperspb.Int64Value)(sPtr).GetValue()
+		return true
 	}
 }
 
@@ -351,7 +363,7 @@ func (s *int64Value2Int64) Key() string {
 
 type string2StringValue struct{}
 
-func String2StringValue() internal.CustomConverter {
+func String2StringValue() internal.CustomConverterV2 {
 	return &string2StringValue{}
 }
 
@@ -363,9 +375,10 @@ func (s *string2StringValue) Is(dstTyp, srcTyp reflect.Type) bool {
 	return ok
 }
 
-func (s *string2StringValue) Converter() func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) {
-	return func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) {
+func (s *string2StringValue) Converter() func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) bool {
+	return func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) bool {
 		*(*wrapperspb.StringValue)(dPtr) = *wrapperspb.String(*(*string)(sPtr))
+		return true
 	}
 }
 
@@ -375,7 +388,7 @@ func (s *string2StringValue) Key() string {
 
 type stringValue2String struct{}
 
-func StringValue2String() internal.CustomConverter {
+func StringValue2String() internal.CustomConverterV2 {
 	return &stringValue2String{}
 }
 
@@ -387,9 +400,10 @@ func (s *stringValue2String) Is(dstTyp, srcTyp reflect.Type) bool {
 	return ok
 }
 
-func (s *stringValue2String) Converter() func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) {
-	return func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) {
+func (s *stringValue2String) Converter() func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) bool {
+	return func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) bool {
 		*(*string)(dPtr) = (*wrapperspb.StringValue)(sPtr).GetValue()
+		return true
 	}
 }
 
@@ -403,7 +417,7 @@ func (s *stringValue2String) Key() string {
 
 type uint322UInt32Value struct{}
 
-func UInt322UInt32Value() internal.CustomConverter {
+func UInt322UInt32Value() internal.CustomConverterV2 {
 	return &uint322UInt32Value{}
 }
 
@@ -415,9 +429,10 @@ func (s *uint322UInt32Value) Is(dstTyp, srcTyp reflect.Type) bool {
 	return ok
 }
 
-func (s *uint322UInt32Value) Converter() func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) {
-	return func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) {
+func (s *uint322UInt32Value) Converter() func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) bool {
+	return func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) bool {
 		*(*wrapperspb.UInt32Value)(dPtr) = *wrapperspb.UInt32(*(*uint32)(sPtr))
+		return true
 	}
 }
 
@@ -427,7 +442,7 @@ func (s *uint322UInt32Value) Key() string {
 
 type uint32Value2UInt32 struct{}
 
-func UInt32Value2UInt32() internal.CustomConverter {
+func UInt32Value2UInt32() internal.CustomConverterV2 {
 	return &uint32Value2UInt32{}
 }
 
@@ -439,9 +454,10 @@ func (s *uint32Value2UInt32) Is(dstTyp, srcTyp reflect.Type) bool {
 	return ok
 }
 
-func (s *uint32Value2UInt32) Converter() func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) {
-	return func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) {
+func (s *uint32Value2UInt32) Converter() func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) bool {
+	return func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) bool {
 		*(*uint32)(dPtr) = (*wrapperspb.UInt32Value)(sPtr).GetValue()
+		return true
 	}
 }
 
@@ -455,7 +471,7 @@ func (s *uint32Value2UInt32) Key() string {
 
 type uint642UInt64Value struct{}
 
-func UInt642UInt64Value() internal.CustomConverter {
+func UInt642UInt64Value() internal.CustomConverterV2 {
 	return &uint642UInt64Value{}
 }
 
@@ -467,9 +483,10 @@ func (s *uint642UInt64Value) Is(dstTyp, srcTyp reflect.Type) bool {
 	return ok
 }
 
-func (s *uint642UInt64Value) Converter() func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) {
-	return func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) {
+func (s *uint642UInt64Value) Converter() func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) bool {
+	return func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) bool {
 		*(*wrapperspb.UInt64Value)(dPtr) = *wrapperspb.UInt64(*(*uint64)(sPtr))
+		return true
 	}
 }
 
@@ -479,7 +496,7 @@ func (s *uint642UInt64Value) Key() string {
 
 type uint64Value2UInt64 struct{}
 
-func UInt64Value2UInt64() internal.CustomConverter {
+func UInt64Value2UInt64() internal.CustomConverterV2 {
 	return &uint64Value2UInt64{}
 }
 
@@ -491,9 +508,10 @@ func (s *uint64Value2UInt64) Is(dstTyp, srcTyp reflect.Type) bool {
 	return ok
 }
 
-func (s *uint64Value2UInt64) Converter() func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) {
-	return func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) {
+func (s *uint64Value2UInt64) Converter() func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) bool {
+	return func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) bool {
 		*(*uint64)(dPtr) = (*wrapperspb.UInt64Value)(sPtr).GetValue()
+		return true
 	}
 }
 

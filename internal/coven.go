@@ -46,7 +46,7 @@ func (c *convertType) key() convertTypeKey {
 }
 
 type converter interface {
-	convert(dPtr, sPtr unsafe.Pointer)
+	convert(dPtr, sPtr unsafe.Pointer) bool
 }
 
 type Converter struct {
@@ -106,6 +106,12 @@ func newConverter(dstTyp, srcTyp reflect.Type, option *StructOption) *Converter 
 		for _, v := range option.CustomConv {
 			if v.Is(dstTyp, srcTyp) {
 				c = Custom(v.Converter())
+				break
+			}
+		}
+		for _, v := range option.CustomConvV2 {
+			if v.Is(dstTyp, srcTyp) {
+				c = CustomV2(v.Converter())
 				break
 			}
 		}

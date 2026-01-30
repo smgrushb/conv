@@ -47,11 +47,11 @@ type time2Timestamp[T any] struct {
 	wrapper TimeWrapper[T]
 }
 
-func CustomTime2Timestamp[T any]() internal.CustomConverter {
+func CustomTime2Timestamp[T any]() internal.CustomConverterV2 {
 	return &time2Timestamp[T]{}
 }
 
-func Time2Timestamp() internal.CustomConverter {
+func Time2Timestamp() internal.CustomConverterV2 {
 	return CustomTime2Timestamp[time.Time]()
 }
 
@@ -63,9 +63,10 @@ func (s *time2Timestamp[T]) Is(dstTyp, srcTyp reflect.Type) bool {
 	return ok
 }
 
-func (s *time2Timestamp[T]) Converter() func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) {
-	return func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) {
+func (s *time2Timestamp[T]) Converter() func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) bool {
+	return func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) bool {
 		cvtTimePbTimestamp(s.wrapper.As, dPtr, sPtr)
+		return true
 	}
 }
 
@@ -77,11 +78,11 @@ type timestamp2Time[T any] struct {
 	wrapper TimeWrapper[T]
 }
 
-func Timestamp2CustomTime[T any]() internal.CustomConverter {
+func Timestamp2CustomTime[T any]() internal.CustomConverterV2 {
 	return &timestamp2Time[T]{}
 }
 
-func Timestamp2Time() internal.CustomConverter {
+func Timestamp2Time() internal.CustomConverterV2 {
 	return Timestamp2CustomTime[time.Time]()
 }
 
@@ -93,9 +94,10 @@ func (s *timestamp2Time[T]) Is(dstTyp, srcTyp reflect.Type) bool {
 	return ok
 }
 
-func (s *timestamp2Time[T]) Converter() func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) {
-	return func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) {
+func (s *timestamp2Time[T]) Converter() func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) bool {
+	return func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) bool {
 		cvtPbTimestampTime(s.wrapper.As, dPtr, sPtr)
+		return true
 	}
 }
 

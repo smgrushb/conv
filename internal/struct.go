@@ -147,18 +147,19 @@ func aliasField(fields []*structItem, aliasFields map[string]string) []*structIt
 	return fields
 }
 
-func (s *structConverter) convert(dPtr, sPtr unsafe.Pointer) {
+func (s *structConverter) convert(dPtr, sPtr unsafe.Pointer) bool {
 	if !s.enable {
-		return
+		return false
 	}
 	if s.convMap {
-		s.mapConvert(dPtr, sPtr)
-		return
+		return s.mapConvert(dPtr, sPtr)
+
 	}
 	if s.dstTyp == s.srcTyp {
 		ptr.Copy(dPtr, sPtr, s.size)
-		return
+		return true
 	}
+	var hasConverted bool
 fcLoop:
 	for _, v := range s.fieldConverters {
 		fc, ok := v.(*fieldConverter)
@@ -167,7 +168,7 @@ fcLoop:
 		}
 		dAnonymousPtr := gslice.Or(fc.dAnonymousPtr)
 		if !dAnonymousPtr && !gslice.Or(fc.sAnonymousPtr) {
-			fc.convert(unsafe.Pointer(uintptr(dPtr)+gslice.Sum(fc.dOffset)), unsafe.Pointer(uintptr(sPtr)+gslice.Sum(fc.sOffset)))
+			hasConverted = fc.convert(unsafe.Pointer(uintptr(dPtr)+gslice.Sum(fc.dOffset)), unsafe.Pointer(uintptr(sPtr)+gslice.Sum(fc.sOffset))) || hasConverted
 		} else {
 			fsPtr, fdPtr := unsafe.Pointer(uintptr(sPtr)+fc.sOffset[0]), unsafe.Pointer(uintptr(dPtr)+fc.dOffset[0])
 			sOffset, dOffset := fc.sOffset[1:], fc.dOffset[1:]
@@ -203,7 +204,10 @@ fcLoop:
 			}
 			if dNil {
 				v := unsafe.Pointer(uintptr(newValuePtr(fc.dStructType)) + dOffset[len(fc.dAnonymousPtr)-1])
-				fc.convert(v, fsPtr)
+				if !fc.convert(v, fsPtr) {
+					continue fcLoop
+				}
+				hasConverted = true
 				for j := len(fc.dAnonymousPtr) - 1; j >= i; j-- {
 					v = unsafe.Pointer(uintptr(v) - dOffset[j])
 					if fc.dAnonymousPtr[j] {
@@ -212,17 +216,19 @@ fcLoop:
 				}
 				*(**int)(fdPtr) = *(**int)(v)
 			} else {
-				fc.convert(fdPtr, fsPtr)
+				hasConverted = fc.convert(fdPtr, fsPtr) || hasConverted
 			}
 		}
 	}
+	return hasConverted
 }
 
-func (s *structConverter) mapConvert(dPtr, sPtr unsafe.Pointer) {
+func (s *structConverter) mapConvert(dPtr, sPtr unsafe.Pointer) bool {
 	dv := reflect.NewAt(s.convertType.dstTyp, dPtr).Elem()
 	if dv.IsNil() {
 		dv.Set(reflect.MakeMapWithSize(s.convertType.dstTyp, len(s.fieldConverters)))
 	}
+	var hasConverted bool
 fcLoop:
 	for _, v := range s.fieldConverters {
 		fc, ok := v.(*fieldMapConverter)
@@ -252,9 +258,10 @@ fcLoop:
 		}
 		dKey := reflect.ValueOf(fc.dName)
 		dVal := reflect.New(fc.dType).Elem()
-		fc.convert(unsafe.Pointer(dVal.UnsafeAddr()), fsPtr)
+		hasConverted = fc.convert(unsafe.Pointer(dVal.UnsafeAddr()), fsPtr) || hasConverted
 		dv.SetMapIndex(dKey, dVal)
 	}
+	return hasConverted
 }
 
 type fieldConverter struct {
@@ -273,10 +280,10 @@ type fieldConverter struct {
 	sFieldName    string
 }
 
-func (f *fieldConverter) convert(dPtr, sPtr unsafe.Pointer) {
+func (f *fieldConverter) convert(dPtr, sPtr unsafe.Pointer) bool {
 	switch f.sType {
 	case typeField:
-		f.converter.convert(dPtr, sPtr)
+		return f.converter.convert(dPtr, sPtr)
 	case typeFieldMethod, typeMethod:
 		var method reflect.Value
 		if f.sType == typeFieldMethod {
@@ -292,16 +299,17 @@ func (f *fieldConverter) convert(dPtr, sPtr unsafe.Pointer) {
 			switch f.sOutType {
 			case boolOut:
 				if !callback[1].Bool() {
-					return
+					return false
 				}
 			case errorOut:
 				if !callback[1].IsNil() {
-					return
+					return false
 				}
 			}
-			f.converter.convert(dPtr, vPtr)
+			return f.converter.convert(dPtr, vPtr)
 		}
 	}
+	return false
 }
 
 func newFieldConverter(df, sf structItem, option *StructOption) *fieldConverter {
@@ -338,8 +346,8 @@ type fieldMapConverter struct {
 	dType         reflect.Type
 }
 
-func (f *fieldMapConverter) convert(dPtr, sPtr unsafe.Pointer) {
-	f.converter.convert(dPtr, sPtr)
+func (f *fieldMapConverter) convert(dPtr, sPtr unsafe.Pointer) bool {
+	return f.converter.convert(dPtr, sPtr)
 }
 
 func newFieldMapConverter(valueType reflect.Type, sf structItem, option *StructOption) *fieldMapConverter {

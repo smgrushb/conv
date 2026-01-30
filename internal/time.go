@@ -12,20 +12,11 @@ import (
 	"unsafe"
 )
 
-type timestampAccuracy int64
-
-const (
-	UnixTimestamp timestampAccuracy = iota
-	UnixMilliTimestamp
-	UnixMicroTimestamp
-)
-
 var (
-	TimeWrappers      []timeWrapper
-	TimeFormat        = "2006-01-02 15:04:05"
-	TimestampAccuracy = UnixTimestamp
-	MinUnix           *int64
-	MinUnixScene      = DefaultMinUnixScene
+	TimeWrappers []timeWrapper
+	TimeFormat   = "2006-01-02 15:04:05"
+	MinUnix      *int64
+	MinUnixScene = DefaultMinUnixScene
 )
 
 func init() {
@@ -62,19 +53,20 @@ type timeConverter struct {
 	format  string
 	minUnix *int64
 	as      asTime
-	cvtOp   func(string, *int64, asTime, unsafe.Pointer, unsafe.Pointer)
+	cvtOp   func(string, *int64, asTime, unsafe.Pointer, unsafe.Pointer) bool
 }
 
-func (t *timeConverter) convert(dPtr, sPtr unsafe.Pointer) {
-	t.cvtOp(t.format, t.minUnix, t.as, dPtr, sPtr)
+func (t *timeConverter) convert(dPtr, sPtr unsafe.Pointer) bool {
+	return t.cvtOp(t.format, t.minUnix, t.as, dPtr, sPtr)
 }
 
-func cvtTimeString(format string, minUnix *int64, as asTime, dPtr, sPtr unsafe.Pointer) {
+func cvtTimeString(format string, minUnix *int64, as asTime, dPtr, sPtr unsafe.Pointer) bool {
 	t := as(sPtr)
 	if minUnix != nil && t.Unix() < *minUnix {
-		return
+		return false
 	}
 	*(*string)(dPtr) = t.Format(format)
+	return true
 }
 
 var (
@@ -84,13 +76,13 @@ var (
 	utcZeroTime   = time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC)
 )
 
-func cvtStringTime(format string, minUnix *int64, as asTime, dPtr, sPtr unsafe.Pointer) {
+func cvtStringTime(format string, minUnix *int64, as asTime, dPtr, sPtr unsafe.Pointer) bool {
 	t, err := time.ParseInLocation(format, *(*string)(sPtr), time.Local)
 	if err != nil {
-		return
+		return false
 	}
 	if minUnix != nil && t.Unix() < *minUnix {
-		return
+		return false
 	}
 	if t.Equal(localZeroUnix) {
 		t = utcZeroUnix
@@ -98,6 +90,7 @@ func cvtStringTime(format string, minUnix *int64, as asTime, dPtr, sPtr unsafe.P
 		t = utcZeroTime
 	}
 	*as(dPtr) = t
+	return true
 }
 
 func getTimeFormat(tw timeWrapper, option *StructOption) string {

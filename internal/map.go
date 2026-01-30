@@ -51,9 +51,9 @@ func newMapConverter(typ *convertType) converter {
 	return c
 }
 
-func (m *mapConverter) convert(dPtr, sPtr unsafe.Pointer) {
+func (m *mapConverter) convert(dPtr, sPtr unsafe.Pointer) bool {
 	if !m.enable {
-		return
+		return false
 	}
 	sv := reflect.NewAt(m.srcTyp, sPtr).Elem()
 	dv := reflect.NewAt(m.dstTyp, dPtr).Elem()
@@ -71,4 +71,5 @@ func (m *mapConverter) convert(dPtr, sPtr unsafe.Pointer) {
 		m.valConverter.convert(unsafe.Pointer(dVal.UnsafeAddr()), sValPtr)
 		dv.SetMapIndex(dKey, dVal)
 	}
+	return true
 }

@@ -25,6 +25,7 @@ func newBasicConverter(typ *convertType) converter {
 	return nil
 }
 
-func (g *basicConverter) convert(dPtr, sPtr unsafe.Pointer) {
+func (g *basicConverter) convert(dPtr, sPtr unsafe.Pointer) bool {
 	g.cvtOp(sPtr, dPtr)
+	return true
 }

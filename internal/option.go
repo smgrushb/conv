@@ -22,13 +22,13 @@ import (
 
 var (
 	ConvProto           bool
-	ProtoConverter      []CustomConverter
+	ProtoConverter      []CustomConverterV2
 	defaultStructOption = func() *StructOption {
 		// TimeFormat的优先级是option > timeWrapper > global，所以这里不做处理
 		return &StructOption{
 			TagName:         TagName,
 			PriorityTagName: PriorityTagName,
-			CustomConv:      ProtoConverter,
+			CustomConvV2:    ProtoConverter,
 		}
 	}
 )
@@ -38,6 +38,12 @@ type Option = func(*StructOption)
 type CustomConverter interface {
 	Is(dstTyp, srcTyp reflect.Type) bool
 	Converter() func(dPtr, sPtr unsafe.Pointer)
+	Key() string
+}
+
+type CustomConverterV2 interface {
+	Is(dstTyp, srcTyp reflect.Type) bool
+	Converter() func(dPtr, sPtr unsafe.Pointer) bool
 	Key() string
 }
 
@@ -62,7 +68,8 @@ type StructOption struct {
 	WhiteListFields      *set.Set[string]
 	AliasFields          map[string]string
 	NestedOption         map[string]*StructOption
-	CustomConv           []CustomConverter `json:"-"`
+	CustomConv           []CustomConverter   `json:"-"`
+	CustomConvV2         []CustomConverterV2 `json:"-"`
 }
 
 func newOption() *StructOption {
@@ -95,7 +102,7 @@ func GetOption(phase int, opts ...Option) *StructOption {
 		}
 	}
 	if ConvProto {
-		opt.CustomConv = append(opt.CustomConv, ProtoConverter...)
+		opt.CustomConvV2 = append(opt.CustomConvV2, ProtoConverter...)
 	}
 	// TimeFormat的优先级是option > timeWrapper > global，所以这里不做处理
 	opt.TagName = gvalue.Valid(opt.TagName, TagName)
@@ -129,6 +136,7 @@ func (o *StructOption) Clone() *StructOption {
 		AliasFields:          gmap.Clone(o.AliasFields),
 		NestedOption:         gmap.CloneBy(o.NestedOption, (*StructOption).Clone),
 		CustomConv:           o.CustomConv,
+		CustomConvV2:         o.CustomConvV2,
 	}
 }
 
@@ -144,6 +152,7 @@ func (o *StructOption) inherit(parent *StructOption) *StructOption {
 	o.MinUnix = parent.MinUnix
 	o.MinUnixScene = parent.MinUnixScene
 	o.CustomConv = parent.CustomConv
+	o.CustomConvV2 = parent.CustomConvV2
 	return o
 }
 
@@ -190,8 +199,9 @@ func (o *StructOption) key() string {
 		return ""
 	}
 	convKey := strings.Join(gslice.Sort(gslice.Map(o.CustomConv, CustomConverter.Key)), ";")
+	convV2Key := strings.Join(gslice.Sort(gslice.Map(o.CustomConvV2, CustomConverterV2.Key)), ";")
 	bs, _ := encoder.Encode(o, encoder.SortMapKeys)
-	return fmt.Sprintf("%s%s", string(bs), convKey)
+	return fmt.Sprintf("%s%s%s", string(bs), convKey, convV2Key)
 }
 
 func split(s string) (first, second string, ok bool) {

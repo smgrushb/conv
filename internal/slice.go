@@ -45,9 +45,9 @@ func newSliceConverter(typ *convertType) converter {
 	return nil
 }
 
-func (s *sliceConverter) convert(dPtr, sPtr unsafe.Pointer) {
+func (s *sliceConverter) convert(dPtr, sPtr unsafe.Pointer) bool {
 	if !s.enable {
-		return
+		return false
 	}
 	dSlice, sSlice := (*unsafeheader.SliceHeader)(dPtr), (*unsafeheader.SliceHeader)(sPtr)
 	length := sSlice.Len
@@ -59,7 +59,7 @@ func (s *sliceConverter) convert(dPtr, sPtr unsafe.Pointer) {
 	}
 	if s.srcTyp == s.dstTyp {
 		ptr.Copy(dSlice.Data, sSlice.Data, uintptr(length)*s.sElemSize)
-		return
+		return true
 	}
 	for dOffset, sOffset, i := uintptr(0), uintptr(0), 0; i < length; i++ {
 		dElemPtr := unsafe.Pointer(uintptr(dSlice.Data) + dOffset)
@@ -68,4 +68,5 @@ func (s *sliceConverter) convert(dPtr, sPtr unsafe.Pointer) {
 		dOffset += s.dElemSize
 		sOffset += s.sElemSize
 	}
+	return true
 }

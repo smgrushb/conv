@@ -12,10 +12,10 @@ import (
 
 var (
 	convProtoOnce  sync.Once
-	ProtoConverter []internal.CustomConverter
+	ProtoConverter []internal.CustomConverterV2
 )
 
-func ConvProto(custom ...internal.CustomConverter) {
+func ConvProto(custom ...internal.CustomConverterV2) {
 	convProtoOnce.Do(func() {
 		internal.ConvProto = true
 		internal.ProtoConverter = append(custom, ProtoConverter...)

@@ -22,7 +22,7 @@ func init() {
 
 type timeDuration2PbDuration struct{}
 
-func TimeDuration2PbDuration() internal.CustomConverter {
+func TimeDuration2PbDuration() internal.CustomConverterV2 {
 	return &timeDuration2PbDuration{}
 }
 
@@ -34,9 +34,10 @@ func (s *timeDuration2PbDuration) Is(dstTyp, srcTyp reflect.Type) bool {
 	return ok
 }
 
-func (s *timeDuration2PbDuration) Converter() func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) {
-	return func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) {
+func (s *timeDuration2PbDuration) Converter() func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) bool {
+	return func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) bool {
 		*(*durationpb.Duration)(dPtr) = *durationpb.New(*(*time.Duration)(sPtr))
+		return true
 	}
 }
 
@@ -46,7 +47,7 @@ func (s *timeDuration2PbDuration) Key() string {
 
 type pbDuration2TimeDuration struct{}
 
-func PbDuration2TimeDuration() internal.CustomConverter {
+func PbDuration2TimeDuration() internal.CustomConverterV2 {
 	return &pbDuration2TimeDuration{}
 }
 
@@ -58,9 +59,10 @@ func (s *pbDuration2TimeDuration) Is(dstTyp, srcTyp reflect.Type) bool {
 	return ok
 }
 
-func (s *pbDuration2TimeDuration) Converter() func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) {
-	return func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) {
+func (s *pbDuration2TimeDuration) Converter() func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) bool {
+	return func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) bool {
 		*(*time.Duration)(dPtr) = (*durationpb.Duration)(sPtr).AsDuration()
+		return true
 	}
 }
 

@@ -180,10 +180,17 @@ func CustomConverter(custom ...internal.CustomConverter) Option {
 	}
 }
 
+// CustomConverterV2 自定义转换器
+func CustomConverterV2(custom ...internal.CustomConverterV2) Option {
+	return func(o *internal.StructOption) {
+		o.CustomConvV2 = append(o.CustomConvV2, custom...)
+	}
+}
+
 // ConvProto 自定义Proto转换器
 // 自动携带所有基础转换器
-func ConvProto(custom ...internal.CustomConverter) Option {
-	return CustomConverter(append(custom, convextend.ProtoConverter...)...)
+func ConvProto(custom ...internal.CustomConverterV2) Option {
+	return CustomConverterV2(append(custom, convextend.ProtoConverter...)...)
 }
 
 // Phase 两阶段转换时分开指定每个阶段的option时使用

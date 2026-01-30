@@ -42,16 +42,16 @@ func newElemConverter(dType, sType reflect.Type, option *StructOption) (*elemCon
 	return nil, false
 }
 
-func (e *elemConverter) convert(dPtr, sPtr unsafe.Pointer) {
+func (e *elemConverter) convert(dPtr, sPtr unsafe.Pointer) bool {
 	for i := 0; i < e.sReferDeep; i++ {
 		sPtr = unsafe.Pointer(*((**int)(sPtr)))
 		if sPtr == nil {
 			if e.dReferDeep > 0 {
 				*(**int)(dPtr) = nil
-				return
+				return true
 			}
 			if e.nilValuePolicy == NilValuePolicyIgnore {
-				return
+				return false
 			}
 			sPtr = e.sEmptyDereferValPtr
 			break
@@ -68,12 +68,15 @@ func (e *elemConverter) convert(dPtr, sPtr unsafe.Pointer) {
 	}
 	if deep := e.dReferDeep - deep; deep > 0 {
 		v := newValuePtr(e.dDereferType)
-		e.converter.convert(v, sPtr)
+		if !e.converter.convert(v, sPtr) {
+			return false
+		}
 		for i := 0; i < deep; i++ {
 			v = unsafe.Pointer(gptr.Of(v))
 		}
 		*(**int)(dPtr) = *(**int)(v)
 	} else {
-		e.converter.convert(dPtr, sPtr)
+		return e.converter.convert(dPtr, sPtr)
 	}
+	return true
 }

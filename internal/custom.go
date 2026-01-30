@@ -10,13 +10,23 @@ import (
 )
 
 type customConverter struct {
-	cvtOp func(unsafe.Pointer, unsafe.Pointer)
+	version int8
+	cvtOp   func(unsafe.Pointer, unsafe.Pointer)
+	cvtOpV2 func(unsafe.Pointer, unsafe.Pointer) bool
 }
 
 func Custom(cvtOp func(unsafe.Pointer, unsafe.Pointer)) converter {
-	return &customConverter{cvtOp: cvtOp}
+	return &customConverter{version: 1, cvtOp: cvtOp}
 }
 
-func (c *customConverter) convert(dPtr, sPtr unsafe.Pointer) {
-	c.cvtOp(dPtr, sPtr)
+func CustomV2(cvtOp func(unsafe.Pointer, unsafe.Pointer) bool) converter {
+	return &customConverter{version: 2, cvtOpV2: cvtOp}
+}
+
+func (c *customConverter) convert(dPtr, sPtr unsafe.Pointer) bool {
+	if c.version == 1 {
+		c.cvtOp(dPtr, sPtr)
+		return true
+	}
+	return c.cvtOpV2(dPtr, sPtr)
 }

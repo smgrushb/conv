@@ -24,18 +24,18 @@ type serializeConverter struct {
 	nilValuePolicy NilValuePolicy
 }
 
-func (s *serializeConverter) convert(dPtr, sPtr unsafe.Pointer) {
+func (s *serializeConverter) convert(dPtr, sPtr unsafe.Pointer) bool {
 	p := reflect.NewAt(s.srcTyp, sPtr)
 	if p.IsNil() {
 		if s.nilValuePolicy == NilValuePolicyIgnore {
-			return
+			return false
 		}
 		p = reflect.New(s.srcTyp)
 	}
 	e := p.Elem()
 	if k := e.Kind(); gvalue.In(k, reflect.Interface, reflect.Pointer, reflect.Slice, reflect.Map) && e.IsNil() {
 		if s.nilValuePolicy == NilValuePolicyIgnore {
-			return
+			return false
 		}
 		switch k {
 		case reflect.Slice:
@@ -48,29 +48,35 @@ func (s *serializeConverter) convert(dPtr, sPtr unsafe.Pointer) {
 	}
 	if str, err := sonic.MarshalString(e.Interface()); err == nil {
 		*(*string)(dPtr) = str
+		return true
 	}
+	return false
 }
 
 type stringsConverter struct {
 	*convertType
 }
 
-func (s *stringsConverter) convert(dPtr, sPtr unsafe.Pointer) {
+func (s *stringsConverter) convert(dPtr, sPtr unsafe.Pointer) bool {
 	if strings, ok := reflect.NewAt(s.srcTyp, sPtr).Interface().(fmt.Stringer); ok {
 		*(*string)(dPtr) = strings.String()
+		return true
 	}
+	return false
 }
 
 type marshalJsonConverter struct {
 	*convertType
 }
 
-func (m *marshalJsonConverter) convert(dPtr, sPtr unsafe.Pointer) {
+func (m *marshalJsonConverter) convert(dPtr, sPtr unsafe.Pointer) bool {
 	if marshaler, ok := reflect.NewAt(m.srcTyp, sPtr).Interface().(json.Marshaler); ok {
 		if bs, err := marshaler.MarshalJSON(); err == nil {
 			*(*string)(dPtr) = string(bs)
+			return true
 		}
 	}
+	return false
 }
 
 func newSerializeConverter(typ *convertType, nilValuePolicy NilValuePolicy) converter {

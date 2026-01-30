@@ -53,11 +53,11 @@ func newAnyConverter(typ *convertType, srcReferDeep ...int) converter {
 	return c
 }
 
-func (a *anyConverter) convert(dPtr, sPtr unsafe.Pointer) {
+func (a *anyConverter) convert(dPtr, sPtr unsafe.Pointer) bool {
 	if a.isTimeType {
 		t := a.asTime(sPtr)
 		if t.Unix() < *a.minUnix {
-			return
+			return false
 		}
 	}
 	var val reflect.Value
@@ -73,6 +73,7 @@ func (a *anyConverter) convert(dPtr, sPtr unsafe.Pointer) {
 		}
 	}
 	*(*any)(dPtr) = val.Interface()
+	return true
 }
 
 func (a *anyConverter) SetSrcReferDeep(deep int) {

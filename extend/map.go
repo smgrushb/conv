@@ -33,7 +33,7 @@ type map2KVP[K comparable, V any] struct {
 	size  uintptr
 }
 
-func Map2KVP[K comparable, V any](kvp ...KVP[K, V]) internal.CustomConverter {
+func Map2KVP[K comparable, V any](kvp ...KVP[K, V]) internal.CustomConverterV2 {
 	v := gslice.FirstOr(kvp, newKeyValuePair[K, V]())
 	rtype := reflect.TypeOf(v).Elem()
 	return &map2KVP[K, V]{kvp: v, rtype: rtype, size: rtype.Size()}
@@ -46,8 +46,8 @@ func (m *map2KVP[K, V]) Is(dstTyp, srcTyp reflect.Type) bool {
 	return dstTyp.Kind() == reflect.Slice && dstTyp.Elem() == m.rtype
 }
 
-func (m *map2KVP[K, V]) Converter() func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) {
-	return func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) {
+func (m *map2KVP[K, V]) Converter() func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) bool {
+	return func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) bool {
 		s := *(*map[K]V)(sPtr)
 		length := len(s)
 		dSlice := (*unsafeheader.SliceHeader)(dPtr)
@@ -69,6 +69,7 @@ func (m *map2KVP[K, V]) Converter() func(dPtr unsafe.Pointer, sPtr unsafe.Pointe
 			kvp.SetValue(v)
 			offset += m.size
 		}
+		return true
 	}
 }
 
@@ -82,7 +83,7 @@ type kvp2Map[K comparable, V any] struct {
 	size  uintptr
 }
 
-func KVP2Map[K comparable, V any](kvp ...KVP[K, V]) internal.CustomConverter {
+func KVP2Map[K comparable, V any](kvp ...KVP[K, V]) internal.CustomConverterV2 {
 	v := gslice.FirstOr(kvp, newKeyValuePair[K, V]())
 	rtype := reflect.TypeOf(v).Elem()
 	return &kvp2Map[K, V]{kvp: v, rtype: rtype, size: rtype.Size()}
@@ -95,8 +96,8 @@ func (m *kvp2Map[K, V]) Is(dstTyp, srcTyp reflect.Type) bool {
 	return srcTyp.Kind() == reflect.Slice && srcTyp.Elem() == m.rtype
 }
 
-func (m *kvp2Map[K, V]) Converter() func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) {
-	return func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) {
+func (m *kvp2Map[K, V]) Converter() func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) bool {
+	return func(dPtr unsafe.Pointer, sPtr unsafe.Pointer) bool {
 		sSlice := (*unsafeheader.SliceHeader)(sPtr)
 		length := sSlice.Len
 		data := make(map[K]V, length)
@@ -109,6 +110,7 @@ func (m *kvp2Map[K, V]) Converter() func(dPtr unsafe.Pointer, sPtr unsafe.Pointe
 			offset += m.size
 		}
 		*(*map[K]V)(dPtr) = data
+		return true
 	}
 }
 
